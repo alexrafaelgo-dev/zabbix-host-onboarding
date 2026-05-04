@@ -20,6 +20,7 @@ INTERFACE_TYPE_MAP = {
     "ipmi": 3,
     "jmx": 4,
 }
+SNMP_VERSIONS = {"2", "2c", "snmpv2", "snmpv2c"}
 
 
 class ZabbixAPIError(RuntimeError):
@@ -63,7 +64,6 @@ class ZabbixClient:
         return data.get("result")
 
 
-
 def load_env(env_file: Path) -> tuple[str, str, int]:
     load_dotenv(env_file)
 
@@ -104,14 +104,11 @@ def build_interface(row: dict[str, str]) -> dict[str, Any]:
 
     ip = (row.get("ip") or "").strip()
     dns = (row.get("dns") or "").strip()
-    port = (row.get("port") or "10050").strip() or "10050"
+    default_port = "161" if interface_label == "snmp" else "10050"
+    port = (row.get("port") or default_port).strip() or default_port
+    useip = 1 if ip else 0
 
-    if ip:
-        useip = 1
-    else:
-        useip = 0
-
-    return {
+    interface: dict[str, Any] = {
         "type": INTERFACE_TYPE_MAP[interface_label],
         "main": 1,
         "useip": useip,
@@ -119,6 +116,24 @@ def build_interface(row: dict[str, str]) -> dict[str, Any]:
         "dns": dns,
         "port": port,
     }
+
+    if interface_label == "snmp":
+        snmp_version = (row.get("snmp_version") or "").strip().lower()
+        snmp_community = (row.get("snmp_community") or "").strip()
+
+        if snmp_version not in SNMP_VERSIONS:
+            raise ValueError(
+                "SNMP requer snmp_version em: 2, 2c, snmpv2 ou snmpv2c."
+            )
+        if not snmp_community:
+            raise ValueError("SNMP requer snmp_community.")
+
+        interface["details"] = {
+            "version": 2,
+            "community": snmp_community,
+        }
+
+    return interface
 
 
 def create_hosts(csv_path: Path, client: ZabbixClient, dry_run: bool = False) -> int:

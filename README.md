@@ -54,6 +54,8 @@ Campos sugeridos:
 - `interface_type` (opcional; padrão: `agent`)
 - `port` (opcional; padrão: `10050`)
 - `description` (opcional)
+- `snmp_version` (obrigatório quando `interface_type=snmp`; suportado: `2`, `2c`, `snmpv2`, `snmpv2c`)
+- `snmp_community` (obrigatório quando `interface_type=snmp`)
 
 ## Validação do CSV
 
@@ -66,7 +68,8 @@ A validação verifica:
 - presença de campos obrigatórios;
 - hostnames duplicados no CSV;
 - formato de IP (quando informado);
-- porta numérica e no intervalo válido (1-65535).
+- porta numérica e no intervalo válido (1-65535);
+- validação específica de SNMP (`snmp_version` e `snmp_community` quando `interface_type=snmp`).
 
 ## Dry-run (sem criar no Zabbix)
 
@@ -88,4 +91,5 @@ python scripts/create_hosts.py --csv inventory/hosts.csv --env-file .env
 ## Observações de design
 
 - Este bootstrap cria apenas a interface principal e associação com 1 grupo e 1 template por linha.
+- Para SNMP, esta versão implementa SNMPv2 com `details.version=2` e community vinda da coluna `snmp_community`.
 - Se você precisar de múltiplos grupos/templates por host, mantenha este desenho simples e evolua com parsing separado (placeholder para evolução futura).

@@ -20,7 +20,10 @@ EXPECTED_COLUMNS = {
     "interface_type",
     "port",
     "description",
+    "snmp_version",
+    "snmp_community",
 }
+SNMP_VERSIONS = {"2", "2c", "snmpv2", "snmpv2c"}
 
 
 def validate_csv(csv_path: Path) -> list[str]:
@@ -57,6 +60,9 @@ def validate_csv(csv_path: Path) -> list[str]:
             ip_value = (row.get("ip") or "").strip()
             dns_value = (row.get("dns") or "").strip()
             port_value = (row.get("port") or "").strip()
+            interface_type = (row.get("interface_type") or "agent").strip().lower() or "agent"
+            snmp_version = (row.get("snmp_version") or "").strip().lower()
+            snmp_community = (row.get("snmp_community") or "").strip()
 
             if not hostname:
                 errors.append(f"Linha {line_number}: hostname é obrigatório.")
@@ -87,6 +93,22 @@ def validate_csv(csv_path: Path) -> list[str]:
                     port = int(port_value)
                     if port < 1 or port > 65535:
                         errors.append(f"Linha {line_number}: porta fora do intervalo 1-65535: {port}")
+
+            if interface_type == "snmp":
+                if not snmp_version:
+                    errors.append(
+                        f"Linha {line_number}: snmp_version é obrigatório quando interface_type=snmp."
+                    )
+                elif snmp_version not in SNMP_VERSIONS:
+                    errors.append(
+                        f"Linha {line_number}: snmp_version inválido '{snmp_version}'. "
+                        "Use: 2, 2c, snmpv2 ou snmpv2c."
+                    )
+
+                if not snmp_community:
+                    errors.append(
+                        f"Linha {line_number}: snmp_community é obrigatório quando interface_type=snmp."
+                    )
 
     return errors
 
