@@ -1,0 +1,5 @@
+hostname,visible_name,ip,dns,group,template,proxy,interface_type,port,description,snmp_version,snmp_community
+srv-app-01,Servidor App 01,10.10.10.11,,Linux servers,OS Linux by Zabbix agent,,agent,10050,Servidor de aplicação principal,,
+srv-db-01,Servidor DB 01,10.10.10.21,,Database servers,DB MySQL by Zabbix agent,,agent,10050,Banco de dados MySQL,,
+srv-web-01,Servidor Web 01,,srv-web-01.local,Web servers,OS Linux by Zabbix agent,Proxy-SP,agent,10050,Host monitorado por DNS via proxy,,
+sw-core-01,Switch Core 01,10.10.20.1,,Network devices,Network Generic Device by SNMP,,snmp,161,Dispositivo SNMP v2,snmpv2,$SNMP_COMMUNITY
